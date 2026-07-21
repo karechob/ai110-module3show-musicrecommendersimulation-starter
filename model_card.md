@@ -169,12 +169,22 @@ If I kept building this, I would change three things:
 
 ## 9. Personal Reflection  
 
-I learned that a recommender is really just a scoring rule plus a sort. Once I saw that, the
-whole thing felt less like magic.
+**Biggest learning moment:** Realizing a recommender is just a scoring rule plus a sort. Once I
+saw that a "recommendation" is only points added up and put in order, the whole thing stopped
+feeling like magic and started feeling like something I could build and change myself.
 
-The most surprising part was how much the weights mattered. Giving genre 2 points instead of
-1 completely changed the results. I also saw how easy it is to create bias by accident — my
-energy gap problem came straight from the data, not from a rule I wrote on purpose.
+**How AI tools helped, and when I checked them:** I used an AI assistant to design the scoring
+math, explain closeness scoring, and format the output. It was fastest when I asked clear,
+specific questions. But I still had to double-check its work — I verified the loaded data were
+real numbers, ran the code myself, and read the actual output for each profile to confirm the
+picks made sense. The AI could suggest a plan, but I had to prove it was true.
 
-This changed how I think about apps like Spotify. When a song "just fits," it is not magic — it
-is math, weights, and data, and those choices decide what I do and do not get to hear.
+**What surprised me:** How real the results feel from such a simple rule. Four point-based checks
+were enough to make the picks feel like a person chose them, even though it is only arithmetic.
+That is also a little unsettling — "feels smart" and "is smart" are not the same thing.
+
+**What I would try next:** Fix the energy-gap bias, give partial credit for similar genres, and
+add a bigger, more balanced catalog so the picks feel fresh instead of repetitive.
+
+The project changed how I see apps like Spotify. When a song "just fits," it is not magic — it is
+math, weights, and data, and those choices quietly decide what I do and do not get to hear.
