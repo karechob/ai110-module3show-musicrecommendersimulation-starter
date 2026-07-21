@@ -105,18 +105,50 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
+Loaded songs: 18
 
-```
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
+============================================================
+🎵 Top 5 recommendations for your profile
+   genre=pop | mood=happy | energy=0.8 | acoustic=no
+============================================================
+
+#1  Sunrise City — Neon Echo
+    Score: 4.39
+    Why:
+      • genre match: pop (+2.0)
+      • mood match: happy (+1.0)
+      • energy 0.82 vs target 0.80 (+0.98)
+      • prefers non-acoustic: acousticness 0.18 (+0.41)
+
+#2  Power Sprint — Max Pulse
+    Score: 3.37
+    Why:
+      • genre match: pop (+2.0)
+      • energy 0.90 vs target 0.80 (+0.90)
+      • prefers non-acoustic: acousticness 0.06 (+0.47)
+
+#3  Gym Hero — Max Pulse
+    Score: 3.35
+    Why:
+      • genre match: pop (+2.0)
+      • energy 0.93 vs target 0.80 (+0.87)
+      • prefers non-acoustic: acousticness 0.05 (+0.47)
+
+#4  Rooftop Lights — Indigo Parade
+    Score: 2.29
+    Why:
+      • mood match: happy (+1.0)
+      • energy 0.76 vs target 0.80 (+0.96)
+      • prefers non-acoustic: acousticness 0.35 (+0.33)
+
+#5  Golden Hour — Indigo Parade
+    Score: 2.21
+    Why:
+      • mood match: happy (+1.0)
+      • energy 0.71 vs target 0.80 (+0.91)
+      • prefers non-acoustic: acousticness 0.40 (+0.30)
 ```
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
 
 ---
 
