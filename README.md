@@ -105,6 +105,9 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
+Output from `python -m src.main` for the default **pop / happy / energy 0.8 / non-acoustic** profile:
+
+```
 Loaded songs: 18
 
 ============================================================
@@ -149,6 +152,104 @@ Loaded songs: 18
       • prefers non-acoustic: acousticness 0.40 (+0.30)
 ```
 
+
+---
+
+## System Evaluation: Multiple User Profiles
+
+I tested the recommender against three distinct "normal" profiles plus three
+adversarial / edge-case profiles designed to try to trick the scoring logic.
+All output is from `python -m src.evaluate`.
+
+### Normal profiles
+
+**High-Energy Pop** — `pop / happy / energy 0.9 / non-acoustic`
+
+```
+#1  Sunrise City — Neon Echo        Score: 4.33  (genre+mood+energy+acoustic)
+#2  Power Sprint — Max Pulse        Score: 3.47  (genre, energy 0.90≈0.90)
+#3  Gym Hero — Max Pulse            Score: 3.44  (genre, energy 0.93≈0.90)
+#4  Rooftop Lights — Indigo Parade  Score: 2.19  (mood only)
+#5  Golden Hour — Indigo Parade     Score: 2.11  (mood only)
+```
+
+**Chill Lofi** — `lofi / chill / energy 0.35 / acoustic`
+
+```
+#1  Library Rain — Paper Lanterns   Score: 4.43  (genre+mood+energy 0.35≈0.35+acoustic)
+#2  Rainy Window — Paper Lanterns   Score: 4.42  (genre+mood+energy+acoustic)
+#3  Midnight Coding — LoRoom        Score: 4.29  (genre+mood+energy+acoustic)
+#4  Deep Focus — LoRoom             Score: 3.38  (genre+energy, mood=focused misses)
+#5  Focus Flow — LoRoom             Score: 3.34  (genre+energy, mood=focused misses)
+```
+
+**Deep Intense Rock** — `rock / intense / energy 0.95 / non-acoustic`
+
+```
+#1  Thunder Alley — Voltline        Score: 4.46  (genre+mood+energy 0.95≈0.95+acoustic)
+#2  Storm Runner — Voltline         Score: 4.41  (genre+mood+energy+acoustic)
+#3  Gym Hero — Max Pulse            Score: 2.46  (mood only — pop, not rock)
+#4  Power Sprint — Max Pulse        Score: 2.42  (mood only — pop, not rock)
+#5  Sunrise City — Neon Echo        Score: 1.28  (no category match)
+```
+
+### Adversarial / edge-case profiles
+
+**Conflicting: High-Energy Acoustic Lofi** — `lofi / intense / energy 0.9 / acoustic`
+Lofi is calm and low-energy, so asking for *high-energy intense acoustic lofi* is
+self-contradictory. Result: the genre bonus (+2.0) dominates and it returns the
+lofi catalog anyway, with near-identical low scores (~2.87–2.89) because every
+lofi song loses ~0.5 on the energy mismatch. The system does **not** flag the
+contradiction — it just quietly ranks lofi songs it "shouldn't" love.
+
+```
+#1  Focus Flow — LoRoom             Score: 2.89
+#2  Deep Focus — LoRoom             Score: 2.89
+#3  Library Rain — Paper Lanterns   Score: 2.88
+#4  Midnight Coding — LoRoom        Score: 2.88
+#5  Rainy Window — Paper Lanterns   Score: 2.87
+```
+
+**Nonexistent: Reggae + Sad** — `reggae / sad / energy 0.5 / non-acoustic`
+No song has genre `reggae` or mood `sad`, so those rules can never fire. The
+system degrades gracefully to the two continuous rules only (energy closeness +
+acoustic fit), producing low scores (~1.1) with **no crash** — but it still
+confidently returns 5 songs that match nothing the user actually asked for.
+
+```
+#1  Night Drive Loop — Neon Echo    Score: 1.14  (energy 0.75≈0.50 + non-acoustic)
+#2  Neon Nights — Neon Echo         Score: 1.12
+#3  Sunrise City — Neon Echo        Score: 1.09
+#4  Golden Hour — Indigo Parade     Score: 1.09
+#5  Power Sprint — Max Pulse        Score: 1.07
+```
+
+**Impossible: Calm Acoustic Rock** — `rock / relaxed / energy 0.1 / acoustic`
+Rock is loud and non-acoustic, but this user wants *calm acoustic rock*. Here the
+scoring logic gets genuinely "tricked": the #1 result is **Slow Tide (ambient)**,
+which isn't rock at all — it wins on mood+energy+acoustic (2.33). The real rock
+songs (Storm Runner, Thunder Alley) get the +2.0 genre bonus but are punished so
+hard on energy and acousticness that they barely tie a non-rock song.
+
+```
+#1  Slow Tide — Orbit Bloom         Score: 2.33  (ambient! mood+energy+acoustic)
+#2  Storm Runner — Voltline         Score: 2.24  (rock genre, but energy/acoustic tank it)
+#3  Thunder Alley — Voltline        Score: 2.19  (rock genre, same problem)
+#4  Coffee Shop Stories — Slow Stereo Score: 2.17
+#5  Velvet Lounge — Slow Stereo     Score: 2.11
+```
+
+### What the edge cases revealed
+
+- **The genre weight can be overpowered.** When a user's continuous preferences
+  fight their genre choice (Calm Acoustic Rock), a +2.0 genre match can lose to a
+  non-genre song that nails mood + energy + acousticness. Whether that's a bug or
+  a feature is a design judgment call.
+- **No validation of preferences.** Unknown genres/moods ("reggae", "sad") don't
+  error — they silently score 0 on those rules, so the system always returns 5
+  songs even when it matches nothing meaningful.
+- **No contradiction awareness.** The recommender never tells the user their
+  request is impossible; it just returns the least-bad options with low scores.
 
 ---
 
