@@ -11,7 +11,7 @@ Your goal is to:
 - Evaluate what your system gets right and wrong
 - Reflect on how this mirrors real world AI recommenders
 
-Replace this paragraph with your own summary of what your version does.
+Real-world recommenders like Spotify and YouTube predict what you'll enjoy next using two main ideas: collaborative filtering, which learns from the behavior of millions of users ("people who liked what you like also liked this") to capture taste that's hard to describe but needs lots of listening data, and content-based filtering, which looks at the measurable attributes of each song and recommends ones whose attributes match your preferences — which is how a brand-new track can be suggested before anyone has played it. My version is a small content-based recommender, because I have a song catalog but no user listening history, so I score each song by how well its features match a user's taste profile; each Song uses its genre, mood, energy, and acousticness for scoring (with id, title, and artist only for display, and tempo_bpm, valence, and danceability reserved for later experiments), and each UserProfile mirrors these with favorite_genre, favorite_mood, target_energy, and likes_acoustic. It prioritizes genre first as the strongest signal of taste, then mood, then how close a song's energy is to the user's target (rewarding closeness rather than just higher values), and finally whether its acousticness fits — producing recommendations that are transparent and easy to explain, at the cost of the surprising discoveries that collaborative filtering provides.
 
 ---
 
