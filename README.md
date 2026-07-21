@@ -13,6 +13,43 @@ Your goal is to:
 
 Real-world recommenders like Spotify and YouTube predict what you'll enjoy next using two main ideas: collaborative filtering, which learns from the behavior of millions of users ("people who liked what you like also liked this") to capture taste that's hard to describe but needs lots of listening data, and content-based filtering, which looks at the measurable attributes of each song and recommends ones whose attributes match your preferences — which is how a brand-new track can be suggested before anyone has played it. My version is a small content-based recommender, because I have a song catalog but no user listening history, so I score each song by how well its features match a user's taste profile; each Song uses its genre, mood, energy, and acousticness for scoring (with id, title, and artist only for display, and tempo_bpm, valence, and danceability reserved for later experiments), and each UserProfile mirrors these with favorite_genre, favorite_mood, target_energy, and likes_acoustic. It prioritizes genre first as the strongest signal of taste, then mood, then how close a song's energy is to the user's target (rewarding closeness rather than just higher values), and finally whether its acousticness fits — producing recommendations that are transparent and easy to explain, at the cost of the surprising discoveries that collaborative filtering provides.
 
+## Algorithm Recipe
+
+My recommender scores every song against a user's taste profile using four
+weighted rules, then ranks all songs by their total score and returns the top k.
+
+**User profile fields:** `favorite_genre`, `favorite_mood`, `target_energy`, `likes_acoustic`
+
+**Scoring rules (per song):**
+
+| Rule | Weight | How points are earned |
+|------|--------|-----------------------|
+| Genre match   | **+2.0** | Full points if the song's genre equals the user's favorite genre |
+| Mood match    | **+1.0** | Full points if the song's mood equals the user's favorite mood |
+| Energy closeness | **+1.0** | `1 - abs(song.energy - target_energy)` — rewards being *close* to the target, not just high |
+| Acoustic fit  | **+0.5** | Rewards high acousticness if `likes_acoustic` is true, low acousticness if false |
+
+**Total score = genre + mood + energy + acoustic**, ranging from **0 to 4.5**.
+
+**Ranking rule:** score every song, sort by total score (highest first), return the top k.
+
+The weights encode my priority order: **genre matters most, mood and energy are
+equal partners, and acousticness is a light tie-breaker.**
+
+## Potential Biases
+
+- **Genre over-prioritization.** Because genre is worth 2× any other rule, the system
+  may bury a song that perfectly matches the user's mood and energy simply because its
+  genre is "wrong" — ignoring great cross-genre songs a real listener might love.
+- **Exact-match rigidity.** Genre and mood only reward *identical* matches, so closely
+  related tastes (e.g. "chill" vs "relaxed", or "rock" vs "synthwave") count for nothing,
+  even though they are musically similar.
+- **No mixed taste.** The profile allows only one favorite genre and one mood, so a user
+  who likes both intense rock and chill lofi cannot be represented accurately.
+- **Popularity & catalog blind spots.** The system can only recommend from a tiny 10–18
+  song catalog and knows nothing about lyrics, language, or artist diversity — so
+  underrepresented genres and moods simply never surface.
+
 ---
 
 ## How The System Works
